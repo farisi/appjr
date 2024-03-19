@@ -9,7 +9,7 @@ export const EmployeeService = {
     storeData(data){
         const req = axios.request({
             method:'post',
-            url:'http://localhost:8080/api/employes',
+            url:'/employes',
             headers:{
                 'Content-Type': 'application/json'
             },

@@ -1,8 +1,12 @@
 <template>
-    <div class="flex flex-col pt-5">
+    <div v-if="loading">
+        Loading employees...
+    </div>
+    <div v-else class="flex flex-col pt-5">
         <div class="col-lg-12">
         <div class="card">
             <h5>Employyes List</h5>
+
             <DataTable :value="employees" :paginator="true" :rows="10" stripedRows removableSort>
                 <Column  header="No" style="min-width: 5rem" >
                 <template #body="{ index,data }">
@@ -41,29 +45,14 @@
 import { ref, onMounted } from 'vue';
 import { FilterMatchMode } from 'primevue/api';
 import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
 import Column from 'primevue/column';
-import MultiSelect from 'primevue/multiselect';
-import Tag from 'primevue/tag';
-import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
-import TriStateCheckbox from 'primevue/tristatecheckbox';
-import VirtualScroller from 'primevue/virtualscroller';
-import {EmployeeService} from '@/services/EmployeeService';
-import axios from 'axios';
+import { storeToRefs } from 'pinia'
+import { useEmployeeStore } from '@/stores/EmployeeStore';
 
-const employees = ref();
-const loading = ref(true);
-
-onMounted(async () => {
-  try {
-    const response = await axios.get('http://localhost:8080/api/employes');
-    employees.value = response.data;
-  } catch (error) {
-    console.error('There was an error fetching the users:', error);
-  }
-});
+const { employees, loading, error } = storeToRefs(useEmployeeStore())
+const {fetchEmployees} = useEmployeeStore()
+fetchEmployees();
 
 const formatDate=(data)=>{
     let tanggalSekarang = new Date(data);
