@@ -7,7 +7,7 @@
         <div class="card">
             <h5>Employyes List</h5>
 
-            <DataTable v-model:editingRows="editingRows" :value="employees" :paginator="true" :rows="10" stripedRows removableSort editMode="row" dataKey="id" >
+            <DataTable v-model:editingRows="editingRows" :value="employees" :paginator="true" :rows="10" stripedRows removableSort editMode="row" dataKey="id" @row-edit-save="onRowEditSave">
                 <Column  header="No" style="min-width: 5rem" >
                 <template #body="{ index,data }">
                     {{ index + 1}}
@@ -23,7 +23,14 @@
                 </Column>
                 <Column field="lastName" header="Last Name" sortable style="min-width:10%" ></Column>
                 <Column field="email" header="Email" sortable style="width: 10%"></Column>
-                <Column field="mobile" header="Mobile" sortable style="width: 10%"></Column>
+                <Column field="mobile" header="Mobile" sortable style="width: 10%">
+                    <template #body="{ data, field }">
+                        {{data[field]}}
+                    </template>
+                    <template #editor="{ data, field }">
+                        <InputText v-model="data[field]"  />
+                    </template>
+                </Column>
                 <Column field="address" header="Address" sortable style="width: 25%"></Column>
                 <Column field="birthDate" header="Birthday" sortable style="width: 10%">
                     <template #body="{ data }">
@@ -64,6 +71,11 @@ const { employees, loading, error } = storeToRefs(useEmployeeStore())
 const {fetchEmployees} = useEmployeeStore()
 const editingRows = ref([]);
 fetchEmployees();
+
+const onRowEditSave = (event) => {
+    let { newData, index } = event;
+    console.log(index);
+};
 
 const formatDate=(data)=>{
     let tanggalSekarang = new Date(data);

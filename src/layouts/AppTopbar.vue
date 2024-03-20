@@ -40,6 +40,11 @@ const items = ref( [
                 route:'/products'
             },
             {
+                label:'Product2',
+                icon:'pi pi-visitor',
+                route:'/customers'
+            },
+            {
                 label: 'About',
                 route: '/about'
             }
