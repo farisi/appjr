@@ -18,7 +18,7 @@ import { ProductService } from '@/services/ProductService';
 import Column from 'primevue/column';
 
 onMounted(() => {
-    ProductService.getProductsMini().then((data) => (products.value = data));
+    ProductService.getProductsSmall().then((data) => (products.value = data));
 });
 
 const products = ref();

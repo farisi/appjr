@@ -16,24 +16,24 @@ export const useEmployeeStore = defineStore('employees', {
       joinDate: null
     },
     loading:false,
-    error:null
+    error:null,
   }),
   getters:{
     totalEmployees: (state) => state.employees.length,
+    listEmployees: (state) => state.employees
   },
   actions: {
-    async fetchEmployees(){
-        this.employees=[];
-        this.loading=true;
-        try {
-            this.employees = await EmployeeService.getData()
-            .then((response)=>this.employees=response.data)
-        } catch (error) {
-            this.error = error;
-        }
-        finally {
-            this.loading=false;
-        }
+    async fetchEmployees() { // Use arrow function
+      this.loading=true;
+      this.error=null;
+      try {
+        const response = await EmployeeService.getData();
+        this.employees = response.data;
+      } catch (error) {
+        this.error=error;
+      } finally {
+        this.loading=false;
+      }
     },
     addEmployee() {
       this.employees.push(this.employeeForm);
@@ -52,5 +52,8 @@ export const useEmployeeStore = defineStore('employees', {
       };
     },
     // Tambahkan metode update dan delete sesuai kebutuhan
+  },
+  mutations: {
+    
   }
 });
