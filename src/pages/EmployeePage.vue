@@ -9,8 +9,10 @@
             </div>
             <div class="card" v-else>
                 <h5>Employyes List</h5>
-                <DataTable :value="employeeStore.employees" lazy paginator  :rows="10" ref="dt" dataKey="id"
-                    :totalRecords="totalRecords" stripedRows removableSort @page="onPage($event)" @sort="onSort($event)">
+                <DataTable :value="employeeStore.employees" lazy paginator :first="useEmployeeStore.number"  :rows="10" ref="dt" dataKey="id"
+                    :totalRecords="totalRecords" stripedRows removableSort @page="onPage($event)" @sort="onSort($event)"
+                    filterDisplay="row"
+                    >
                     <Column  header="No" style="min-width: 5rem" >
                     <template #body="{ index,data }">
                         {{ index + 1}}
@@ -63,11 +65,12 @@ import { useEmployeeStore } from '@/stores/EmployeeStore';
 
 
 const employeeStore = useEmployeeStore();
-const totalRecords = useEmployeeStore.totalEmployees;
+const totalRecords = useEmployeeStore.totalRecords;
 
 const dt = ref();
 const lazyParams = ref({});
 const first = ref(0);
+
 
 onMounted(() => {
   employeeStore.fetchEmployees();
