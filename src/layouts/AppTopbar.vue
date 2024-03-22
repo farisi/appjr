@@ -49,7 +49,7 @@ const items = ref( [
                 icon:'pi pi-visitor',
                 route:'/customers'},
                 {
-                label:'Customers',
+                label:'Customers2',
                 icon:'pi pi-visitor',
                 route:'/customers2'},
             {
