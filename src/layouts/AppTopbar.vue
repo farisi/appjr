@@ -48,6 +48,10 @@ const items = ref( [
                 label:'Customers',
                 icon:'pi pi-visitor',
                 route:'/customers'},
+                {
+                label:'Customers',
+                icon:'pi pi-visitor',
+                route:'/customers2'},
             {
                 label: 'About',
                 route: '/about'
