@@ -1,299 +1,131 @@
 
 <template>
-    <div>
-        <div class="card">
-            <Toolbar class="mb-4">
-                <template #start>
-                    <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="danger" @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+	<div class="card p-fluid">
+        <DataTable :value="customers" lazy paginator :first="first" :rows="10" v-model:filters="filters" ref="dt" dataKey="id"
+            :totalRecords="totalRecords" :loading="loading" @page="onPage($event)" @sort="onSort($event)" @filter="onFilter($event)" filterDisplay="row"
+            :globalFilterFields="['name','country.name', 'company', 'representative.name']"
+            v-model:selection="selectedCustomers" :selectAll="selectAll" @select-all-change="onSelectAllChange" @row-select="onRowSelect" @row-unselect="onRowUnselect" tableStyle="min-width: 75rem">
+            <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
+            <Column field="name" header="Name" filterMatchMode="startsWith" sortable>
+                <template #filter="{filterModel,filterCallback}">
+                    <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search"/>
                 </template>
-
-                <template #end>
-                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" />
-                    <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)"  />
+            </Column>
+            <Column field="country.name" header="Country" filterField="country.name" filterMatchMode="contains" sortable>
+                <template #body="{ data }">
+                    <div class="flex align-items-center gap-2">
+                        <img alt="flag" src="https://primefaces.org/cdn/primevue/images/flag/flag_placeholder.png" :class="`flag flag-${data.country.code}`" style="width: 24px" />
+                        <span>{{ data.country.name }}</span>
+                    </div>
                 </template>
-            </Toolbar>
-
-            <DataTable ref="dt" :value="products" v-model:selection="selectedProducts" dataKey="id"
-                :paginator="true" :rows="10" :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown" :rowsPerPageOptions="[5,10,25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products">
-                <template #header>
-                    <div class="flex flex-wrap gap-2 align-items-center justify-content-between">
-                        <h4 class="m-0">Manage Products</h4>
-						<IconField iconPosition="left">
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Search..." />
-                        </IconField>
-					</div>
+                <template #filter="{filterModel,filterCallback}">
+                    <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search"/>
                 </template>
-
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="code" header="Code" sortable style="min-width:12rem"></Column>
-                <Column field="name" header="Name" sortable style="min-width:16rem"></Column>
-                <Column header="Image">
-                    <template #body="slotProps">
-                        <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" class="border-round" style="width: 64px" />
-                    </template>
-                </Column>
-                <Column field="price" header="Price" sortable style="min-width:8rem">
-                    <template #body="slotProps">
-                        {{formatCurrency(slotProps.data.price)}}
-                    </template>
-                </Column>
-                <Column field="category" header="Category" sortable style="min-width:10rem"></Column>
-                <Column field="rating" header="Reviews" sortable style="min-width:12rem">
-                    <template #body="slotProps">
-                        <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
-                    </template>
-                </Column>
-                <Column field="inventoryStatus" header="Status" sortable style="min-width:12rem">
-                    <template #body="slotProps">
-                        <Tag :value="slotProps.data.inventoryStatus" :severity="getStatusLabel(slotProps.data.inventoryStatus)" />
-                    </template>
-                </Column>
-                <Column :exportable="false" style="min-width:8rem">
-                    <template #body="slotProps">
-                        <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editProduct(slotProps.data)" />
-                        <Button icon="pi pi-trash" outlined rounded severity="danger" @click="confirmDeleteProduct(slotProps.data)" />
-                    </template>
-                </Column>
-            </DataTable>
-        </div>
-
-        <Dialog v-model:visible="productDialog" :style="{width: '450px'}" header="Product Details" :modal="true" class="p-fluid">
-            <img v-if="product.image" :src="`https://primefaces.org/cdn/primevue/images/product/${product.image}`" :alt="product.image" class="block m-auto pb-3" />
-            <div class="field">
-                <label for="name">Name</label>
-                <InputText id="name" v-model.trim="product.name" required="true" autofocus :class="{'p-invalid': submitted && !product.name}" />
-                <small class="p-error" v-if="submitted && !product.name">Name is required.</small>
-            </div>
-            <div class="field">
-                <label for="description">Description</label>
-                <Textarea id="description" v-model="product.description" required="true" rows="3" cols="20" />
-            </div>
-
-            <div class="field">
-				<label for="inventoryStatus" class="mb-3">Inventory Status</label>
-				<Dropdown id="inventoryStatus" v-model="product.inventoryStatus" :options="statuses" optionLabel="label" placeholder="Select a Status">
-					<template #value="slotProps">
-						<div v-if="slotProps.value && slotProps.value.value">
-                            <Tag :value="slotProps.value.value" :severity="getStatusLabel(slotProps.value.label)" />
-                        </div>
-                        <div v-else-if="slotProps.value && !slotProps.value.value">
-                            <Tag :value="slotProps.value" :severity="getStatusLabel(slotProps.value)" />
-                        </div>
-						<span v-else>
-							{{slotProps.placeholder}}
-						</span>
-					</template>
-				</Dropdown>
-			</div>
-
-            <div class="field">
-                <label class="mb-3">Category</label>
-                <div class="formgrid grid">
-                    <div class="field-radiobutton col-6">
-                        <RadioButton id="category1" name="category" value="Accessories" v-model="product.category" />
-                        <label for="category1">Accessories</label>
+            </Column>
+            <Column field="company" header="Company" filterMatchMode="contains" sortable>
+                <template #filter="{filterModel,filterCallback}">
+                    <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search"/>
+                </template>
+            </Column>
+            <Column field="representative.name" header="Representative" filterField="representative.name" sortable>
+                <template #body="{ data }">
+                    <div class="flex align-items-center gap-2">
+                        <img :alt="data.representative.name" :src="`https://primefaces.org/cdn/primevue/images/avatar/${data.representative.image}`" style="width: 32px" />
+                        <span>{{ data.representative.name }}</span>
                     </div>
-                    <div class="field-radiobutton col-6">
-                        <RadioButton id="category2" name="category" value="Clothing" v-model="product.category" />
-                        <label for="category2">Clothing</label>
-                    </div>
-                    <div class="field-radiobutton col-6">
-                        <RadioButton id="category3" name="category" value="Electronics" v-model="product.category" />
-                        <label for="category3">Electronics</label>
-                    </div>
-                    <div class="field-radiobutton col-6">
-                        <RadioButton id="category4" name="category" value="Fitness" v-model="product.category" />
-                        <label for="category4">Fitness</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="formgrid grid">
-                <div class="field col">
-                    <label for="price">Price</label>
-                    <InputNumber id="price" v-model="product.price" mode="currency" currency="USD" locale="en-US" />
-                </div>
-                <div class="field col">
-                    <label for="quantity">Quantity</label>
-                    <InputNumber id="quantity" v-model="product.quantity" integeronly />
-                </div>
-            </div>
-            <template #footer>
-                <Button label="Cancel" icon="pi pi-times" text @click="hideDialog"/>
-                <Button label="Save" icon="pi pi-check" text @click="saveProduct" />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="deleteProductDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="product">Are you sure you want to delete <b>{{product.name}}</b>?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteProductDialog = false"/>
-                <Button label="Yes" icon="pi pi-check" text @click="deleteProduct" />
-            </template>
-        </Dialog>
-
-        <Dialog v-model:visible="deleteProductsDialog" :style="{width: '450px'}" header="Confirm" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="product">Are you sure you want to delete the selected products?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteProductsDialog = false"/>
-                <Button label="Yes" icon="pi pi-check" text @click="deleteSelectedProducts" />
-            </template>
-        </Dialog>
+                </template>
+                <template #filter="{filterModel,filterCallback}">
+                    <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" placeholder="Search"/>
+                </template>
+            </Column>
+        </DataTable>
 	</div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { FilterMatchMode } from 'primevue/api';
-import { useToast } from 'primevue/usetoast';
-import Column from 'primevue/column';
-import Rating from 'primevue/rating';
-import Badge from 'primevue/badge';
-import BadgeDirective from "primevue/badgedirective";
-import Tag from 'primevue/tag';
-import Button from 'primevue/button';
-import FileUpload from 'primevue/fileupload';
-import Toolbar from 'primevue/toolbar';
-import InputIcon from 'primevue/inputicon';
+import { CustomerService } from '@/services/CustomerService';
 import InputText from 'primevue/inputtext';
-import InputNumber from 'primevue/inputnumber';
-import Dialog from 'primevue/dialog';
-import IconField from 'primevue/iconfield';
-import Textarea from 'primevue/textarea';
-import Dropdown from 'primevue/dropdown';
-import RadioButton from 'primevue/radiobutton';
-import { ProductService } from '@/services/ProductService';
+import Column from 'primevue/column';
 
 onMounted(() => {
-    ProductService.getProducts().then((data) => (products.value = data));
+    loading.value = true;
+
+    lazyParams.value = {
+        first: 0,
+        rows: 10,
+        sortField: null,
+        sortOrder: null,
+        filters: filters.value
+    };
+
+    loadLazyData();
 });
 
-const toast = useToast();
 const dt = ref();
-const products = ref();
-const productDialog = ref(false);
-const deleteProductDialog = ref(false);
-const deleteProductsDialog = ref(false);
-const product = ref({});
-const selectedProducts = ref();
+const loading = ref(false);
+const totalRecords = ref(0);
+const customers = ref();
+const selectedCustomers = ref();
+const selectAll = ref(false);
+const first = ref(0);
 const filters = ref({
-    'global': {value: null, matchMode: FilterMatchMode.CONTAINS},
+    'name': {value: '', matchMode: 'contains'},
+    'country.name': {value: '', matchMode: 'contains'},
+    'company': {value: '', matchMode: 'contains'},
+    'representative.name': {value: '', matchMode: 'contains'},
 });
-const submitted = ref(false);
-const statuses = ref([
-    {label: 'INSTOCK', value: 'instock'},
-    {label: 'LOWSTOCK', value: 'lowstock'},
-    {label: 'OUTOFSTOCK', value: 'outofstock'}
+const lazyParams = ref({});
+const columns = ref([
+    {field: 'name', header: 'Name'},
+    {field: 'country.name', header: 'Country'},
+    {field: 'company', header: 'Company'},
+    {field: 'representative.name', header: 'Representative'}
 ]);
 
-const formatCurrency = (value) => {
-    if(value)
-        return value.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-    return;
-};
-const openNew = () => {
-    product.value = {};
-    submitted.value = false;
-    productDialog.value = true;
-};
-const hideDialog = () => {
-    productDialog.value = false;
-    submitted.value = false;
-};
-const saveProduct = () => {
-    submitted.value = true;
+const loadLazyData = (event) => {
+    loading.value = true;
+    lazyParams.value = { ...lazyParams.value, first: event?.first || first.value };
 
-    if (product.value.name.trim()) {
-        if (product.value.id) {
-            product.value.inventoryStatus = product.value.inventoryStatus.value ? product.value.inventoryStatus.value : product.value.inventoryStatus;
-            products.value[findIndexById(product.value.id)] = product.value;
-            toast.add({severity:'success', summary: 'Successful', detail: 'Product Updated', life: 3000});
-        }
-        else {
-            product.value.id = createId();
-            product.value.code = createId();
-            product.value.image = 'product-placeholder.svg';
-            product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
-            products.value.push(product.value);
-            toast.add({severity:'success', summary: 'Successful', detail: 'Product Created', life: 3000});
-        }
+    setTimeout(() => {
+        CustomerService.getCustomers({ lazyEvent: JSON.stringify(lazyParams.value) }).then((data) => {
+            customers.value = data.customers;
+            totalRecords.value = data.totalRecords;
+            loading.value = false;
+        });
+    }, Math.random() * 1000 + 250);
+};
+const onPage = (event) => {
+    lazyParams.value = event;
+    loadLazyData(event);
+};
+const onSort = (event) => {
+    lazyParams.value = event;
+    loadLazyData(event);
+};
+const onFilter = (event) => {
+    lazyParams.value.filters = filters.value ;
+    loadLazyData(event);
+};
+const onSelectAllChange = (event) => {
+    selectAll.value = event.checked;
 
-        productDialog.value = false;
-        product.value = {};
+    if (selectAll) {
+        CustomerService.getCustomers().then(data => {
+            selectAll.value = true;
+            selectedCustomers.value = data.customers;
+        });
+    }
+    else {
+        selectAll.value = false;
+        selectedCustomers.value = [];
     }
 };
-const editProduct = (prod) => {
-    product.value = {...prod};
-    productDialog.value = true;
+const onRowSelect = () => {
+    selectAll.value = selectedCustomers.value.length === totalRecords.value;
 };
-const confirmDeleteProduct = (prod) => {
-    product.value = prod;
-    deleteProductDialog.value = true;
-};
-const deleteProduct = () => {
-    products.value = products.value.filter(val => val.id !== product.value.id);
-    deleteProductDialog.value = false;
-    product.value = {};
-    toast.add({severity:'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
-};
-const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < products.value.length; i++) {
-        if (products.value[i].id === id) {
-            index = i;
-            break;
-        }
-    }
-
-    return index;
-};
-const createId = () => {
-    let id = '';
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for ( var i = 0; i < 5; i++ ) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
-}
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-const confirmDeleteSelected = () => {
-    deleteProductsDialog.value = true;
-};
-const deleteSelectedProducts = () => {
-    products.value = products.value.filter(val => !selectedProducts.value.includes(val));
-    deleteProductsDialog.value = false;
-    selectedProducts.value = null;
-    toast.add({severity:'success', summary: 'Successful', detail: 'Products Deleted', life: 3000});
-};
-
-const getStatusLabel = (status) => {
-    switch (status) {
-        case 'INSTOCK':
-            return 'success';
-
-        case 'LOWSTOCK':
-            return 'warning';
-
-        case 'OUTOFSTOCK':
-            return 'danger';
-
-        default:
-            return null;
-    }
+const onRowUnselect = () => {
+    selectAll.value = false;
 };
 
 </script>

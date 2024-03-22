@@ -20,7 +20,6 @@ export const useEmployeeStore = defineStore('employees', {
   }),
   getters:{
     totalEmployees: (state) => state.employees.length,
-    listEmployees: (state) => state.employees
   },
   actions: {
     async fetchEmployees() { // Use arrow function
@@ -28,7 +27,7 @@ export const useEmployeeStore = defineStore('employees', {
       this.error=null;
       try {
         const response = await EmployeeService.getData();
-        this.employees = response.data;
+        this.employees = response.data.content;
       } catch (error) {
         this.error=error;
       } finally {

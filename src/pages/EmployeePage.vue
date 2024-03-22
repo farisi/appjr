@@ -1,15 +1,16 @@
 <template>
     <div class="flex flex-col pt-5">
         <div class="col-lg-12">
-
-            <div v-if="employeeStore.error">
+            <div v-if="isLoading()">
+                Loading employees...
+            </div>
+            <div v-else-if="employeeStore.error">
                 <p>Error fetching employees: {{ error.message }}</p>
             </div>
             <div class="card" v-else>
                 <h5>Employyes List</h5>
-                <DataTable :value="employeeStore.employees" dataKey="id" lazy :paginator="true" :rows="10" :totalRecords="totalRecords" :loading="isLoading()" stripedRows removableSort
-                    filterDisplay="row"
-                >
+                <DataTable :value="employeeStore.employees" lazy paginator  :rows="10" ref="dt" dataKey="id"
+                    :totalRecords="totalRecords" stripedRows removableSort @page="onPage($event)" @sort="onSort($event)">
                     <Column  header="No" style="min-width: 5rem" >
                     <template #body="{ index,data }">
                         {{ index + 1}}
@@ -38,7 +39,7 @@
                         </template>
                     </Column>
                 </DataTable>
-                <h4>{{totalEmployees }}</h4>
+                <h4></h4>
             </div>
     </div>
 </div>
@@ -62,7 +63,12 @@ import { useEmployeeStore } from '@/stores/EmployeeStore';
 
 
 const employeeStore = useEmployeeStore();
-const totalEmployees = employeeStore.totalEmployees;
+const totalRecords = useEmployeeStore.totalEmployees;
+
+const dt = ref();
+const lazyParams = ref({});
+const first = ref(0);
+
 onMounted(() => {
   employeeStore.fetchEmployees();
 });
@@ -78,8 +84,15 @@ function isLoading() {
   return employeeStore.loading;
 }
 
-const editEmployee = (prod) => {
-    
+const onPage = (event) => {
+    lazyParams.value = event;
+};
+const onSort = (event) => {
+    console.log(event);
+    lazyParams.value = event;
+};
+const onFilter = (event) => {
+    lazyParams.value.filters = filters.value ;
 };
 
 const formatDate=(data)=>{

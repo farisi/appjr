@@ -10,6 +10,7 @@ import UserPage from '@/pages/UserPage.vue';
 import EmployeePage from '@/pages/EmployeePage.vue';
 import EmployeeForm from '@/pages/EmployeeForm.vue';
 import CustomerPage from '@/pages/CustomerPage.vue';
+import ProductPage from '@/pages/ProductPage.vue';
 
 // 2. Define some routes
 // Each route should map to a component.
@@ -22,6 +23,7 @@ const routes = [{
         { path: '/about', component: About },
         {path: '/visitor', component: Visitor},
         {path:'/products', component:Product},
+        {path:'/products2', component: ProductPage},
         {path:'/customers', component: CustomerPage},
         { path: '/users', component: UserPage },
         { path: '/employes', component: EmployeePage },
