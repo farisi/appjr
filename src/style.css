@@ -1,3 +1,7 @@
+.p-menubar-root-list {
+    margin-left:25px !important;
+}
+
 @tailwind base;
 @tailwind utilities;
 @tailwind variants;

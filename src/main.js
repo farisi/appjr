@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import   './style.css'
 import 'primevue/resources/themes/aura-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import App from "./App.vue";
