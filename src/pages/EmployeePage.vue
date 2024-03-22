@@ -1,15 +1,15 @@
 <template>
     <div class="flex flex-col pt-5">
         <div class="col-lg-12">
-            <div v-if="isLoading()">
-                Loading employees...
-            </div>
-            <div v-else-if="error">
+
+            <div v-if="employeeStore.error">
                 <p>Error fetching employees: {{ error.message }}</p>
             </div>
             <div class="card" v-else>
                 <h5>Employyes List</h5>
-                <DataTable :value="employees" :paginator="true" :rows="10" stripedRows removableSort>
+                <DataTable :value="employeeStore.employees" dataKey="id" lazy :paginator="true" :rows="10" :totalRecords="totalRecords" :loading="isLoading()" stripedRows removableSort
+                    filterDisplay="row"
+                >
                     <Column  header="No" style="min-width: 5rem" >
                     <template #body="{ index,data }">
                         {{ index + 1}}
@@ -38,6 +38,7 @@
                         </template>
                     </Column>
                 </DataTable>
+                <h4>{{totalEmployees }}</h4>
             </div>
     </div>
 </div>
@@ -60,20 +61,21 @@ import {EmployeeService} from '@/services/EmployeeService';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
 
 
-const {employees,loading,error}=useEmployeeStore();
-const {fetchEmployees} = useEmployeeStore();
-
-fetchEmployees();
+const employeeStore = useEmployeeStore();
+const totalEmployees = employeeStore.totalEmployees;
+onMounted(() => {
+  employeeStore.fetchEmployees();
+});
 
 function showError() {
-  if (error) {
-    console.error("Error fetching employees:", error);
+  if (employeeStore.error) {
+    console.error("Error fetching employees:", employeeStore.error);
     // You can display the error message to the user here (e.g., using a toast)
   }
 }
 
 function isLoading() {
-  return loading;
+  return employeeStore.loading;
 }
 
 const editEmployee = (prod) => {
