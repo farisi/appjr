@@ -18,6 +18,7 @@ export const useEmployeeStore = defineStore('employees', {
         unpaged: false
     },
     employee: {
+      id:0,
       firstName: '',
       lastName: '',
       email: '',
@@ -45,6 +46,13 @@ export const useEmployeeStore = defineStore('employees', {
   }),
   getters:{
     totalEmployees: (state) => state.employees.length,
+    updatedEmployees: (state) => {
+      states.employees.filter((item)=>{
+        if(item.id==employee.id){
+          item=employee
+        }
+      })
+    }
   },
   actions: {
     async fetchEmployees() { // Use arrow function
@@ -68,9 +76,37 @@ export const useEmployeeStore = defineStore('employees', {
         this.loading=false;
       }
     },
-    addEmployee() {
-      this.employees.push(this.employeeForm);
-      this.resetForm();
+    async addEmployee() {
+      this.error=null;
+      try {
+        const response = await EmployeeService.storeData(JSON.stringify(this.employee))
+        this.employees.push(this.employee);
+        this.resetForm();
+      }
+      catch(error) {
+        this.error=error;
+      }
+      finally {
+        this.loading=false;
+      }
+    },
+    async updateEmployee(){
+      this.error=null;
+      try {
+        console.log(this.employee)
+        const response = await EmployeeService.updateData(this.employee.id,JSON.stringify(this.employee))
+        const index = this.employees.findIndex(e=>e.id===this.employee.id);
+        if(index !== -1){
+          this.employees[index] = this.employee;
+        }
+      }
+      catch(error) {
+        this.error=error;
+      }
+      finally {
+        this.loading=false;
+      }
+     
     },
     resetForm() {
       this.employee = {

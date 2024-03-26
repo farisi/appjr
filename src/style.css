@@ -2,10 +2,6 @@
     margin-left:25px !important;
 }
 
-@tailwind base;
-@tailwind utilities;
-@tailwind variants;
-
 .p-icon-field-left .p-inputtext{
     padding: 7px !important;
 }

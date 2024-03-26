@@ -4,10 +4,11 @@ import axios from 'axios';
 
 export const EmployeeService = {
     getData(){
-        return  http.get('/employes');
+        console.log("url employees get /employes?pagesize=20",)
+        return  http.get('/employes?pagesize=20');
     },
     storeData(data){
-        const req = axios.request({
+        const req = http.request({
             method:'post',
             url:'/employes',
             headers:{
@@ -16,5 +17,14 @@ export const EmployeeService = {
             data:data
         })
         return req
+    },
+    updateData(id,data){
+        const req = http.request({
+            method:'patch',
+            url:'/employes/' + id,
+            headers:{'Content-Type': 'application/json'},
+            data:data
+        })
+        return req;
     }
 }

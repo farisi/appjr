@@ -53,6 +53,11 @@ const items = ref( [
                 icon:'pi pi-visitor',
                 route:'/customers2'},
             {
+                label:'Messager',
+                icon:'pi pi-visitor',
+                route:'/messager'
+            },
+            {
                 label: 'About',
                 route: '/about'
             }

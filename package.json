@@ -14,8 +14,11 @@
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
     "primevue": "^3.49.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5",
     "vue": "^3.2.47",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "vue-socket.io": "^3.0.10"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",

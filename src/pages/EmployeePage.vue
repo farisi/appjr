@@ -4,15 +4,22 @@
             <div v-if="isLoading()">
                 Loading employees...
             </div>
-            <div v-else-if="employeeStore.error">
-                <p>Error fetching employees: {{ error.message }}</p>
-            </div>
             <div class="card" v-else>
                 <h5>Employyes List</h5>
-                <DataTable :value="employeeStore.employees" lazy paginator :first="useEmployeeStore.number"  :rows="10" ref="dt" dataKey="id"
-                    :totalRecords="totalRecords" stripedRows removableSort @page="onPage($event)" @sort="onSort($event)"
-                    filterDisplay="row"
-                    >
+                <Toolbar class="mb-4">
+                    <template #start>
+                        <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
+                    </template>
+
+                    <template #end>
+                        
+                    </template>
+                </Toolbar>
+                <DataTable :value="employeeStore.employees" :paginator="true" 
+                    @page="onPage($event)"
+                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                    :rowsPerPageOptions="[5,10,25,50]"  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} employees" :rows="10" ref="dt" dataKey="id"
+                   stripedRows removableSort >
                     <Column  header="No" style="min-width: 5rem" >
                     <template #body="{ index,data }">
                         {{ index + 1}}
@@ -31,50 +38,128 @@
                     <Column field="placeOfBirth" header="Place Of Birth" sortable style="width:10%"></Column>
                     <Column field="joinDate" header="Join Date" sortable style="width: 20%">
                         <template #body="{ data }">
-                            {{ formatDateTime(data.joinDate) }}
+                            {{ formatDate(data.joinDate) }}
                         </template>
                     </Column>
                     <Column header="Action"  style="width: 15%">
                         <template #body="{ data }">
-                            <Button icon="pi pi-file-edit" severity="warning" aria-label="Submit" />
-                            <Button icon="pi pi-trash" severity="danger" />
+                            <Button icon="pi pi-pencil" severity="warning"  rounded aria-label="Edit Form" @click="editEmployee(data)"/>
+                            <Button icon="pi pi-trash" severity="danger" rounded />
                         </template>
                     </Column>
                 </DataTable>
                 <h4></h4>
             </div>
+            <Dialog v-model:visible="employeeDialog" :style="{width: '450px'}" header="Add Employee" :modal="true" class="p-fluid">
+               
+                        <div class="field">
+                            <label for="firstname">Firstname</label>
+                            <InputText id="firstname" v-model.trim="employeeStore.employee.firstName" required="true" autofocus :class="{'p-invalid': submitted && !employeeStore.employee.firstName}" />
+                            <small class="p-error" v-if="submitted && !employeeStore.employee.firstName">Name is required.</small>
+                        </div>
+                        <div class="field">
+                            <label for="lastname">Lastname</label>
+                            <InputText id="lastname" v-model.trim="employeeStore.employee.lastName"  autofocus :class="{'p-invalid': submitted && !employeeStore.employee.lastName}" />
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <InputText id="email" v-model="employeeStore.employee.email" required="true"  :class="{'p-invalid': submitted && !employeeStore.employee.email}"/>
+                        </div>
+                    <div class="field">
+                        <label for="mobile">Mobile</label>
+                        <InputText id="mobile" required="true" v-model="employeeStore.employee.mobile"  :class="{'p-invalid': submitted && !employeeStore.employee.mobile}"/>
+                    </div>
+                    <div class="field">
+                        <label for="join_date">Join Date</label>
+                        <Calendar v-model="employeeStore.employee.joinDate" inputId="join_date" />
+                    </div>
+                    <div class="field">
+                        <label for="birth_date">Birth day</label>
+                        <Calendar v-model="employeeStore.employee.birthDate" inputId="birth_date" />
+                    </div>
+                    <div class="field">
+                        <label for="placeOfBirth">Place Of Birth</label>
+                        <InputText id="placeOfBirth" v-model="employeeStore.employee.placeOfBirth" />
+                    </div>
+                    
+                    <div class="field">
+                        <label for="address">Address</label>
+                        <Textarea id="address" rows="4" v-model="employeeStore.employee.address"/>
+                    </div>                    
+                
+                        <template #footer>
+                            <Button label="Cancel" icon="pi pi-times" text @click="hideDialog"/>
+                            <Button label="Save" icon="pi pi-check" text @click="saveEmployee" />
+                        </template>
+            </Dialog>
     </div>
 </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { FilterMatchMode } from 'primevue/api';
-import InputIcon from 'primevue/inputicon';
+import { ref, onMounted } from 'vue';
 import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
+import Textarea from 'primevue/textarea';
 import Column from 'primevue/column';
-import MultiSelect from 'primevue/multiselect';
-import Tag from 'primevue/tag';
-import Dropdown from 'primevue/dropdown';
+import Toolbar from 'primevue/toolbar';
 import Button from 'primevue/button';
-import TriStateCheckbox from 'primevue/tristatecheckbox';
-import VirtualScroller from 'primevue/virtualscroller';
-import {EmployeeService} from '@/services/EmployeeService';
+import Calendar from 'primevue/calendar';
+import Dialog from 'primevue/dialog';
+import { useToast } from 'primevue/usetoast';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
 
 
+
 const employeeStore = useEmployeeStore();
-const totalRecords = useEmployeeStore.totalRecords;
-
-const dt = ref();
-const lazyParams = ref({});
-const first = ref(0);
-
+const totalRecords = useEmployeeStore.totalEmployees;
+const submitted = ref(false);
+const employeeDialog = ref(false);
+const toast = useToast();
 
 onMounted(() => {
   employeeStore.fetchEmployees();
 });
+
+const saveEmployee = () => {
+    submitted.value = true;
+
+    if(employeeStore.employee.firstName!='' && employeeStore.employee.email!='' && employeeStore.employee.joinDate!=null && employeeStore.employee.placeOfBirth!='' && employeeStore.employee.birthDate!=null){
+        console.log( " save Employee ", employeeStore.employee);
+        if(employeeStore.error==null) {
+            if(employeeStore.employee.id){
+                //const req=EmployeeService.storeData(JSON.stringify(employeeStore.employee))
+                employeeStore.updateEmployee()
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Your data saved already!', life: 3000 });
+            }
+            else {
+                employeeStore.addEmployee();
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Your data saved already!', life: 3000 });
+            }
+        }
+        else {
+            employeeDialog.value=false;
+            toast.add({ severity: 'info', summary: 'Info', detail: employeeStore.error, life: 3000 });
+        }
+    }
+    else {
+        toast.add({ severity: 'info', summary: 'Info', detail: 'Can not pass validation!', life: 3000 });
+    }
+
+    employeeDialog.value=false;
+};
+
+const editEmployee = (prod) => {
+    employeeStore.employee.id=prod.id;
+    employeeStore.employee.firstName = prod.firstName
+    employeeStore.employee.lastName = prod.lastName
+    employeeStore.employee.email=prod.email
+    employeeStore.employee.mobile=prod.mobile
+    employeeStore.employee.placeOfBirth=prod.placeOfBirth;
+    employeeStore.employee.address=prod.address;
+    employeeStore.employee.birthDate=formatDateForm(prod.birthDate)
+    employeeStore.employee.joinDate=formatDateForm(prod.joinDate);
+    employeeDialog.value = true;
+};
 
 function showError() {
   if (employeeStore.error) {
@@ -87,16 +172,39 @@ function isLoading() {
   return employeeStore.loading;
 }
 
+const openNew = () => {
+    employeeStore.resetForm();
+    submitted.value = false;
+    employeeDialog.value = true;
+};
+
+const hideDialog = () => {
+    employeeDialog.value = false;
+    submitted.value = false;
+};
+
 const onPage = (event) => {
-    lazyParams.value = event;
+    console.log(event);
+    // lazyParams.value = event;
+    // loadLazyData(event);
 };
 const onSort = (event) => {
     console.log(event);
     lazyParams.value = event;
+    loadLazyData(event);
 };
 const onFilter = (event) => {
     lazyParams.value.filters = filters.value ;
+    loadLazyData(event);
 };
+
+const formatDateForm=(data)=>{
+    let ts = new Date();
+    ts.setFullYear(data[0]);
+    ts.setMonth(data[1]);
+    ts.setDate(data[2])
+    return ts;
+}
 
 const formatDate=(data)=>{
     let tanggalSekarang = new Date(data);
