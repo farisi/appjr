@@ -108,6 +108,14 @@ export const useEmployeeStore = defineStore('employees', {
       }
      
     },
+    async removeEmployee(){
+      this.error=null;
+      const response = await EmployeeService.removeEmployee(this.employee.id)
+      const index = this.employees.findIndex(e=>e.id===this.employee.id);
+        if(index !== -1){
+          this.employees.slice(0,index);
+        }
+    },
     resetForm() {
       this.employee = {
         firstName: '',

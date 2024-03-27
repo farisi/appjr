@@ -44,7 +44,7 @@
                     <Column header="Action"  style="width: 15%">
                         <template #body="{ data }">
                             <Button icon="pi pi-pencil" severity="warning"  rounded aria-label="Edit Form" @click="editEmployee(data)"/>
-                            <Button icon="pi pi-trash" severity="danger" rounded />
+                            <Button icon="pi pi-trash" severity="danger" rounded @click="confirmDeleteEmploye(data)" />
                         </template>
                     </Column>
                 </DataTable>
@@ -92,6 +92,17 @@
                             <Button label="Save" icon="pi pi-check" text @click="saveEmployee" />
                         </template>
             </Dialog>
+
+            <Dialog v-model:visible="deleteEmployesDialog" :style="{width: '550px'}" header="Confirm" :modal="true">
+            <div class="confirmation-content">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                <span v-if="employeeStore.employee">Are you sure you want to delete <b>{{employeeStore.employee.email}}</b>?</span>
+            </div>
+            <template #footer>
+                <Button label="No" icon="pi pi-times" text @click="closeDeleteEmployesDialog"/>
+                <Button label="Yes" icon="pi pi-check" text @click="deleteEmploye" />
+            </template>
+        </Dialog>
     </div>
 </div>
 </template>
@@ -114,6 +125,7 @@ const employeeStore = useEmployeeStore();
 const totalRecords = useEmployeeStore.totalEmployees;
 const submitted = ref(false);
 const employeeDialog = ref(false);
+const deleteEmployesDialog = ref(false);
 const toast = useToast();
 
 onMounted(() => {
@@ -159,6 +171,24 @@ const editEmployee = (prod) => {
     employeeStore.employee.birthDate=formatDateForm(prod.birthDate)
     employeeStore.employee.joinDate=formatDateForm(prod.joinDate);
     employeeDialog.value = true;
+};
+
+const confirmDeleteEmploye = (prod) => {
+    employeeStore.employee = prod;
+    console.log(employeeStore.employee.firstName)
+    deleteEmployesDialog.value = true;
+};
+
+const closeDeleteEmployesDialog = () => {
+    deleteEmployesDialog.value = false;
+    employeeStore.resetForm();
+}
+
+const deleteEmploye = () => {
+    //products.value = products.value.filter(val => val.id !== product.value.id);
+    deleteEmployesDialog.value = false;
+    //product.value = {};
+    toast.add({severity:'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
 };
 
 function showError() {

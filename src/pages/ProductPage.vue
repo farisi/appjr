@@ -160,8 +160,6 @@ import { FilterMatchMode } from 'primevue/api';
 import { useToast } from 'primevue/usetoast';
 import Column from 'primevue/column';
 import Rating from 'primevue/rating';
-import Badge from 'primevue/badge';
-import BadgeDirective from "primevue/badgedirective";
 import Tag from 'primevue/tag';
 import Button from 'primevue/button';
 import FileUpload from 'primevue/fileupload';

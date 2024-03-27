@@ -26,5 +26,12 @@ export const EmployeeService = {
             data:data
         })
         return req;
+    },
+    deleteEmployee(id){
+        const req = http.request({
+            method:'delete',
+            url:'/employees/' + id,
+            headers:{'Content-Type': 'application/json'}
+        });
     }
 }

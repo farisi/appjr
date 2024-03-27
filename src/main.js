@@ -12,8 +12,8 @@ import Toast from 'primevue/toast';
 import ToastService from 'primevue/toastservice';
 import router from './routers';
 import {createPinia} from "pinia"
-import VueSocketIO from 'vue-3-socket.io'
-import SocketIO from 'socket.io-client'
+// import VueSocketIO from 'vue-3-socket.io'
+// import SocketIO from 'socket.io-client'
 import '@/assets/styles.scss';
 
 
@@ -26,9 +26,9 @@ createApp(App)
 .use(router)
 .use(ToastService )
 .use(createPinia())
-.use(new VueSocketIO({
-    debug:true,
-    connection: SocketIO('http://localhost:3000')
-}))
+// .use(new VueSocketIO({
+//     debug:true,
+//     connection: SocketIO('http://localhost:3000')
+// }))
 .component('Toast', Toast)
 .mount('#app')
