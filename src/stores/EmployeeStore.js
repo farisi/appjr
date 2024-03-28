@@ -24,6 +24,7 @@ export const useEmployeeStore = defineStore('employees', {
       email: '',
       address: '',
       mobile: '',
+      salary:0.0,
       jobExperiences:[],
       birthDate: null,
       placeOfBirth: '',

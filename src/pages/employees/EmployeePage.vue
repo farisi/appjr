@@ -86,12 +86,14 @@
                         <label for="placeOfBirth">Place Of Birth</label>
                         <InputText id="placeOfBirth" v-model="employeeStore.employee.placeOfBirth" />
                     </div>
-                    
+                    <div class="field">
+                        <label for="salary">Salary</label>
+                        <InputNumber v-model="employeeStore.employee.salary" inputId="locale-indonesia" locale="id-ID"/>
+                    </div>                    
                     <div class="field">
                         <label for="address">Address</label>
                         <Textarea id="address" rows="4" v-model="employeeStore.employee.address"/>
-                    </div>                    
-                
+                    </div>                   
                         <template #footer>
                             <Button label="Cancel" icon="pi pi-times" text @click="hideDialog"/>
                             <Button label="Save" icon="pi pi-check" text @click="saveEmployee" />
@@ -119,6 +121,7 @@ import Textarea from 'primevue/textarea';
 import Column from 'primevue/column';
 import Toolbar from 'primevue/toolbar';
 import Button from 'primevue/button';
+import InputNumber from 'primevue/inputnumber';
 import Calendar from 'primevue/calendar';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
@@ -176,6 +179,7 @@ const editEmployee = (prod) => {
     employeeStore.employee.mobile=prod.mobile
     employeeStore.employee.placeOfBirth=prod.placeOfBirth;
     employeeStore.employee.address=prod.address;
+    employeeStore.employee.salary=prod.salary;
     employeeStore.employee.birthDate=formatDateForm(prod.birthDate)
     employeeStore.employee.joinDate=formatDateForm(prod.joinDate);
     employeeDialog.value = true;
@@ -243,7 +247,10 @@ const formatDateForm=(data)=>{
 }
 
 const formatDate=(data)=>{
-    let tanggalSekarang = new Date(data);
+     let tanggalSekarang = new Date();
+     tanggalSekarang.setFullYear(data[0]);
+     tanggalSekarang.setMonth(data[1]);
+     tanggalSekarang.setDate(data[2])
     let formatIndonesia=new Intl.DateTimeFormat('id-ID',{
         year: 'numeric',    month: 'short',    day: '2-digit'
     }).format(tanggalSekarang)
