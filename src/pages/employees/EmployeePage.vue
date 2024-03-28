@@ -1,11 +1,12 @@
 <template>
     <div class="flex flex-col pt-5">
+        <Toast />
         <div class="col-lg-12">
             <div v-if="isLoading()">
                 Loading employees...
             </div>
             <div class="card" v-else>
-                <h5>Employyes List</h5>
+                <h5>Employees List</h5>
                 <Toolbar class="mb-4">
                     <template #start>
                         <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" />
@@ -25,8 +26,11 @@
                         {{ index + 1}}
                     </template>
                     </Column>
-                    <Column field="firstName" header="First Name" sortable  style="min-width:10%" ></Column>
-                    <Column field="lastName" header="Last Name" sortable style="min-width:10%" ></Column>
+                    <Column header="name" style="min-width:10%">
+                        <template #body="{data}" >
+                            {{  data.firstName + ' ' + data.lastName }}
+                        </template>"
+                    </Column>
                     <Column field="email" header="Email" sortable style="width: 10%"></Column>
                     <Column field="mobile" header="Mobile" sortable style="width: 10%"></Column>
                     <Column field="address" header="Address" sortable style="width: 25%"></Column>
@@ -36,13 +40,14 @@
                         </template>
                     </Column>
                     <Column field="placeOfBirth" header="Place Of Birth" sortable style="width:10%"></Column>
-                    <Column field="joinDate" header="Join Date" sortable style="width: 20%">
+                    <Column field="joinDate" header="Join Date" sortable style="width: 10%">
                         <template #body="{ data }">
                             {{ formatDate(data.joinDate) }}
                         </template>
                     </Column>
-                    <Column header="Action"  style="width: 15%">
+                    <Column header="Action"  style="width: 25%">
                         <template #body="{ data }">
+                            <Button icon="pi pi-search" severity="info"  rounded aria-label="Employee Detail" @click="router.push({path:'/users'})"/>
                             <Button icon="pi pi-pencil" severity="warning"  rounded aria-label="Edit Form" @click="editEmployee(data)"/>
                             <Button icon="pi pi-trash" severity="danger" rounded @click="confirmDeleteEmploye(data)" />
                         </template>
@@ -94,15 +99,15 @@
             </Dialog>
 
             <Dialog v-model:visible="deleteEmployesDialog" :style="{width: '550px'}" header="Confirm" :modal="true">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                <span v-if="employeeStore.employee">Are you sure you want to delete <b>{{employeeStore.employee.email}}</b>?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="closeDeleteEmployesDialog"/>
-                <Button label="Yes" icon="pi pi-check" text @click="deleteEmploye" />
-            </template>
-        </Dialog>
+                <div class="confirmation-content">
+                    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
+                    <span v-if="employeeStore.employee">Are you sure you want to delete <b>{{employeeStore.employee.email}}</b>?</span>
+                </div>
+                <template #footer>
+                    <Button label="No" icon="pi pi-times" text @click="closeDeleteEmployesDialog"/>
+                    <Button label="Yes" icon="pi pi-check" text @click="deleteEmployee" />
+                </template>
+            </Dialog>
     </div>
 </div>
 </template>
@@ -118,11 +123,14 @@ import Calendar from 'primevue/calendar';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
+import { useRouter } from "vue-router";
+
+
+const router = useRouter();
 
 
 
 const employeeStore = useEmployeeStore();
-const totalRecords = useEmployeeStore.totalEmployees;
 const submitted = ref(false);
 const employeeDialog = ref(false);
 const deleteEmployesDialog = ref(false);
@@ -175,7 +183,6 @@ const editEmployee = (prod) => {
 
 const confirmDeleteEmploye = (prod) => {
     employeeStore.employee = prod;
-    console.log(employeeStore.employee.firstName)
     deleteEmployesDialog.value = true;
 };
 
@@ -184,11 +191,10 @@ const closeDeleteEmployesDialog = () => {
     employeeStore.resetForm();
 }
 
-const deleteEmploye = () => {
-    //products.value = products.value.filter(val => val.id !== product.value.id);
+const deleteEmployee = () => {
+    employeeStore.removeEmployee();  
     deleteEmployesDialog.value = false;
-    //product.value = {};
-    toast.add({severity:'success', summary: 'Successful', detail: 'Product Deleted', life: 3000});
+    toast.add({severity:'success', summary: 'Successful', detail: 'Employee Deleted', life: 3000});
 };
 
 function showError() {

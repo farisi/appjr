@@ -24,6 +24,7 @@ export const useEmployeeStore = defineStore('employees', {
       email: '',
       address: '',
       mobile: '',
+      jobExperiences:[],
       birthDate: null,
       placeOfBirth: '',
       joinDate: null
@@ -80,7 +81,7 @@ export const useEmployeeStore = defineStore('employees', {
       this.error=null;
       try {
         const response = await EmployeeService.storeData(JSON.stringify(this.employee))
-        this.employees.push(this.employee);
+        this.employees.splice(0,0,this.employee);
         this.resetForm();
       }
       catch(error) {
@@ -110,11 +111,23 @@ export const useEmployeeStore = defineStore('employees', {
     },
     async removeEmployee(){
       this.error=null;
-      const response = await EmployeeService.removeEmployee(this.employee.id)
-      const index = this.employees.findIndex(e=>e.id===this.employee.id);
+      console.log("will delete employee with id ", this.employee.id);
+      try {
+        const response = await  EmployeeService.deleteEmployee(this.employee.id)
+        const index = this.employees.findIndex(e=>e.id===this.employee.id);
+        console.log(" index ", index);
         if(index !== -1){
-          this.employees.slice(0,index);
+          this.employees.splice(index,1);
         }
+      }
+      catch(error) {
+        console.log('terjadi error ', error);
+        this.error=error;
+      }
+      finally {
+        this.loading=false;
+        this.resetForm();
+      }
     },
     resetForm() {
       this.employee = {

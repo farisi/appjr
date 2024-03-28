@@ -7,8 +7,8 @@ import Visitor from '@/pages/Visitor.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Product from '@/pages/Product.vue';
 import UserPage from '@/pages/UserPage.vue';
-import EmployeePage from '@/pages/EmployeePage.vue';
-import EmployeeForm from '@/pages/EmployeeForm.vue';
+import EmployeePage from '@/pages/employees/EmployeePage.vue';
+import EmployeeDetailPage from '@/pages/Employees/EmployeeDetailPage.vue';
 import CustomerPage from '@/pages/CustomerPage.vue';
 import ProductPage from '@/pages/ProductPage.vue';
 import Customer from '@/pages/Customer.vue';
@@ -30,7 +30,7 @@ const routes = [{
         {path:'/customers2', component: Customer},
         { path: '/users', component: UserPage },
         { path: '/employes', component: EmployeePage },
-        {path: '/employes/create', component: EmployeeForm},
+        {path:'/employee/details', component: EmployeeDetailPage},
         {path:'/messager', component: Messager}
     ]
 }
