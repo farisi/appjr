@@ -47,7 +47,7 @@
                     </Column>
                     <Column header="Action"  style="width: 25%">
                         <template #body="{ data }">
-                            <Button icon="pi pi-search" severity="info"  rounded aria-label="Employee Detail" @click="router.push({path:'/users'})"/>
+                            <Button icon="pi pi-search" severity="info"  rounded aria-label="Employee Detail" @click="router.push({path:'/employes/' + data.id })"/>
                             <Button icon="pi pi-pencil" severity="warning"  rounded aria-label="Edit Form" @click="editEmployee(data)"/>
                             <Button icon="pi pi-trash" severity="danger" rounded @click="confirmDeleteEmploye(data)" />
                         </template>

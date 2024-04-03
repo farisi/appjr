@@ -4,39 +4,40 @@
         <div class="col-12">
             <div class="card">
                 <h5>Employee Detail</h5>
+                {{ employeeStore.employee }}
             </div>
         </div>
     </div>
 </template>
 <script setup>
-import { ref } from 'vue';
-import InputText from 'primevue/inputtext';
-import Button from 'primevue/button';
-import Textarea from 'primevue/textarea';
-import Calendar from 'primevue/calendar';
-import { EmployeeService } from '@/services/EmployeeService';
+import { ref,watch,onMounted } from 'vue';
+import { useRoute, useRouter } from "vue-router"
 import { useToast } from 'primevue/usetoast';
 import { useEmployeeStore } from '@/stores/EmployeeStore';
+import {storeToRefs} from 'pinia';
 
 
 const employeeStore = useEmployeeStore();
 const toast = useToast();
+const route = useRoute();
+const router = useRouter();
 
-const employeeStoring = () => {
+onMounted(()=>{
 
-    if (employeeStore.employee.firstName != '' && employeeStore.employee.email != '' && employeeStore.employee.joinDate != null && employeeStore.employee.placeOfBirth != '' && employeeStore.employee.birthDate != null) {
-        console.log(" employee ", JSON.stringify(employeeStore.employee));
-        const req = EmployeeService.storeData(JSON.stringify(employeeStore.employee))
-        employeeStore.resetForm();
-        req.then((response) => {
-            toast.add({ severity: 'success', summary: 'Success', detail: 'Your data saved already!', life: 3000 });
-        })
+    employeeStore.employee = employeeStore.employees.find((emp)=>{
+        return (emp.id == route.params.id)
+    })
 
+    console.log( " employeeStore.employee " + employeeStore.employee);
+
+    if(employeeStore.employee === "undefined"){
+        console.log( " pindah ke halaman lain! ")
+        router.push({path:'/'})
     }
     else {
-        toast.add({ severity: 'info', summary: 'Info', detail: 'Can not pass validation!', life: 3000 });
+        console.log( " tetap dihalaman ini! ")
     }
-}
+})
 
 </script>
 <style>

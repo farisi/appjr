@@ -1,150 +1,144 @@
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 import { computed, ref } from "vue";
-import {EmployeeService} from '@/services/EmployeeService';
+import { EmployeeService } from "@/services/EmployeeService";
 
-export const useEmployeeStore = defineStore('employees', {
+export const useEmployeeStore = defineStore("employees", {
   state: () => ({
     employees: [],
-    pageable:{
+    pageable: {
       pageNumber: 0,
       pageSize: 10,
       sort: {
-            empty: false,
-            sorted: true,
-            unsorted: false
-        },
-        offset: 0,
-        paged: true,
-        unpaged: false
+        empty: false,
+        sorted: true,
+        unsorted: false,
+      },
+      offset: 0,
+      paged: true,
+      unpaged: false,
     },
     employee: {
-      id:0,
-      firstName: '',
-      lastName: '',
-      email: '',
-      address: '',
-      mobile: '',
-      salary:0.0,
-      jobExperiences:[],
+      id: 0,
+      firstName: "",
+      lastName: "",
+      email: "",
+      address: "",
+      mobile: "",
+      salary: 0.0,
+      jobExperiences: [],
       birthDate: null,
-      placeOfBirth: '',
-      joinDate: null
+      placeOfBirth: "",
+      joinDate: null,
     },
-    last:false,
-    totalElements:0,
+    last: false,
+    totalElements: 0,
     totalPages: 1,
-    size:0,
-    number:0,
-    sort:{
+    size: 0,
+    number: 0,
+    sort: {
       empty: false,
-      sorted:true,
-      unsorted:false
+      sorted: true,
+      unsorted: false,
     },
-    totalRecord:0,
-    first:true,
-    empty:true,
-    loading:false,
-    error:null,
+    totalRecord: 0,
+    first: true,
+    empty: true,
+    loading: false,
+    error: null,
   }),
-  getters:{
+  getters: {
     totalEmployees: (state) => state.employees.length,
-    updatedEmployees: (state) => {
-      states.employees.filter((item)=>{
-        if(item.id==employee.id){
-          item=employee
-        }
-      })
-    }
   },
   actions: {
-    async fetchEmployees() { // Use arrow function
-      this.loading=true;
-      this.error=null;
+    async fetchEmployees() {
+      // Use arrow function
+      this.loading = true;
+      this.error = null;
       try {
-        
         const response = await EmployeeService.getData();
         this.employees = response.data.content;
-        this.totalRecord=response.data.numberOfElements;
-        this.pageable=response.data.pageable;
-        this.sort=response.data.sort;
-        this.number=response.data.number;
-        this.first=response.data.first;
-        this.empty=response.data.empty;
-        this.totalPages=response.data.totalPages;
-
+        this.totalRecord = response.data.numberOfElements;
+        this.pageable = response.data.pageable;
+        this.sort = response.data.sort;
+        this.number = response.data.number;
+        this.first = response.data.first;
+        this.empty = response.data.empty;
+        this.totalPages = response.data.totalPages;
       } catch (error) {
-        this.error=error;
+        this.error = error;
       } finally {
-        this.loading=false;
+        this.loading = false;
       }
     },
     async addEmployee() {
-      this.error=null;
+      this.error = null;
       try {
-        const response = await EmployeeService.storeData(JSON.stringify(this.employee))
-        this.employees.splice(0,0,this.employee);
+        const response = await EmployeeService.storeData(
+          JSON.stringify(this.employee)
+        );
+        this.employees.splice(0, 0, this.employee);
         this.resetForm();
-      }
-      catch(error) {
-        this.error=error;
-      }
-      finally {
-        this.loading=false;
+      } catch (error) {
+        this.error = error;
+      } finally {
+        this.loading = false;
       }
     },
-    async updateEmployee(){
-      this.error=null;
+    async updateEmployee() {
+      this.error = null;
       try {
-        console.log(this.employee)
-        const response = await EmployeeService.updateData(this.employee.id,JSON.stringify(this.employee))
-        const index = this.employees.findIndex(e=>e.id===this.employee.id);
-        if(index !== -1){
+        console.log(this.employee);
+        const response = await EmployeeService.updateData(
+          this.employee.id,
+          JSON.stringify(this.employee)
+        );
+        const index = this.employees.findIndex(
+          (e) => e.id === this.employee.id
+        );
+        if (index !== -1) {
           this.employees[index] = this.employee;
         }
+      } catch (error) {
+        this.error = error;
+      } finally {
+        this.loading = false;
       }
-      catch(error) {
-        this.error=error;
-      }
-      finally {
-        this.loading=false;
-      }
-     
     },
-    async removeEmployee(){
-      this.error=null;
+    async removeEmployee() {
+      this.error = null;
       console.log("will delete employee with id ", this.employee.id);
       try {
-        const response = await  EmployeeService.deleteEmployee(this.employee.id)
-        const index = this.employees.findIndex(e=>e.id===this.employee.id);
+        const response = await EmployeeService.deleteEmployee(this.employee.id);
+        const index = this.employees.findIndex(
+          (e) => e.id === this.employee.id
+        );
         console.log(" index ", index);
-        if(index !== -1){
-          this.employees.splice(index,1);
+        if (index !== -1) {
+          this.employees.splice(index, 1);
         }
-      }
-      catch(error) {
-        console.log('terjadi error ', error);
-        this.error=error;
-      }
-      finally {
-        this.loading=false;
+      } catch (error) {
+        console.log("terjadi error ", error);
+        this.error = error;
+      } finally {
+        this.loading = false;
         this.resetForm();
       }
+    },
+    getEmployeeById(employeeId) {
+      this.employee = this.employees.find((emp) => emp.id === employeeId);
     },
     resetForm() {
       this.employee = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        address: '',
-        mobile: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        address: "",
+        mobile: "",
         birthDate: null,
-        placeOfBirth: '',
-        joinDate: null
+        placeOfBirth: "",
+        joinDate: null,
       };
     },
     // Tambahkan metode update dan delete sesuai kebutuhan
   },
-  mutations: {
-    
-  }
 });

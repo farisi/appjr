@@ -30,7 +30,7 @@ const routes = [{
         {path:'/customers2', component: Customer},
         { path: '/users', component: UserPage },
         { path: '/employes', component: EmployeePage },
-        {path:'/employee/details', component: EmployeeDetailPage},
+        {path:'/employes/:id', component: EmployeeDetailPage},
         {path:'/messager', component: Messager}
     ]
 }
